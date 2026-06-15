@@ -5,8 +5,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -26,6 +28,16 @@ private val transportOptions = listOf(
     "Flight", "Rental car", "Scooter", "Train", "Taxi / Grab", "Walk", "Ferry"
 )
 
+private data class TravelerOption(val label: String, val subtitle: String)
+
+private val travelerOptions = listOf(
+    TravelerOption("Just me", "Solo trip"),
+    TravelerOption("My partner", "2 travelers"),
+    TravelerOption("Family", "With kids"),
+    TravelerOption("Friends", "Small group"),
+    TravelerOption("Tour group", "10+ people")
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TripPlanningScreen(
@@ -35,6 +47,8 @@ fun TripPlanningScreen(
     val tripDetails = viewModel.tripDetails.value
     val showSheet by viewModel.showTransportSheet
     val selected by viewModel.selectedTransport
+    val showTravelersSheet by viewModel.showTravelersSheet
+    val selectedTraveler by viewModel.selectedTraveler
 
     if (showSheet) {
         ModalBottomSheet(
@@ -152,6 +166,160 @@ fun TripPlanningScreen(
         }
     }
 
+    if (showTravelersSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.closeTravelersSheet() },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 4.dp)
+                        .width(36.dp)
+                        .height(4.dp)
+                        .background(Color(0xFFDDDCEA), RoundedCornerShape(2.dp))
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Who's coming with you?",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1B1A38)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFFFF3DC), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "CHOOSE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB07800)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                travelerOptions.forEach { option ->
+                    val isSelected = selectedTraveler == option.label
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.selectTraveler(option.label) }
+                                .padding(horizontal = 20.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .background(
+                                            color = if (isSelected) Color(0xFF2E2C8C) else Color(0xFFEBEDF5),
+                                            shape = RoundedCornerShape(14.dp)
+                                        )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.People,
+                                        contentDescription = null,
+                                        tint = if (isSelected) Color.White else Color(0xFF3D3B8E),
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        text = option.label,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Color(0xFF1B1A38)
+                                    )
+                                    Text(
+                                        text = option.subtitle,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF9896B0)
+                                    )
+                                }
+                            }
+
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(
+                                        color = if (isSelected) Color(0xFF2E2C8C) else Color.Transparent,
+                                        shape = CircleShape
+                                    )
+                                    .border(
+                                        width = 1.5.dp,
+                                        color = if (isSelected) Color(0xFF2E2C8C) else Color(0xFFDDDCEA),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 78.dp, end = 20.dp),
+                            thickness = 0.5.dp,
+                            color = Color(0xFFEDECF4)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = { viewModel.confirmTraveler() },
+                    enabled = selectedTraveler != null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2E2C8C),
+                        disabledContainerColor = Color(0xFFB0AECA)
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    Text(
+                        text = "Confirm",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -220,7 +388,7 @@ fun TripPlanningScreen(
                         value = tripDetails.travelers,
                         placeholder = "",
                         icon = Icons.Outlined.People,
-                        onClick = { viewModel.updateTravelers("Me + partner") }
+                        onClick = { viewModel.openTravelersSheet() }
                     )
                     TripFormField(
                         label = "What's the purpose?",

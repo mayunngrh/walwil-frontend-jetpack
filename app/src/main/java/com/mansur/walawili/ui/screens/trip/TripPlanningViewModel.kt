@@ -46,6 +46,24 @@ class TripPlanningViewModel : ViewModel() {
         _showTransportSheet.value = false
     }
 
+    private val _showTravelersSheet = mutableStateOf(false)
+    val showTravelersSheet: State<Boolean> = _showTravelersSheet
+
+    private val _selectedTraveler = mutableStateOf<String?>(null)
+    val selectedTraveler: State<String?> = _selectedTraveler
+
+    fun openTravelersSheet() { _showTravelersSheet.value = true }
+    fun closeTravelersSheet() { _showTravelersSheet.value = false }
+
+    fun selectTraveler(option: String) { _selectedTraveler.value = option }
+
+    fun confirmTraveler() {
+        _selectedTraveler.value?.let {
+            _tripDetails.value = _tripDetails.value.copy(travelers = it)
+        }
+        _showTravelersSheet.value = false
+    }
+
     fun navigateTo(screen: Screen) {
         _currentScreen.value = screen
     }
