@@ -26,6 +26,26 @@ class TripPlanningViewModel : ViewModel() {
     private val _tripDetails = mutableStateOf(TripDetails())
     val tripDetails: State<TripDetails> = _tripDetails
 
+    private val _showTransportSheet = mutableStateOf(false)
+    val showTransportSheet: State<Boolean> = _showTransportSheet
+
+    private val _selectedTransport = mutableStateOf<Set<String>>(emptySet())
+    val selectedTransport: State<Set<String>> = _selectedTransport
+
+    fun openTransportSheet() { _showTransportSheet.value = true }
+    fun closeTransportSheet() { _showTransportSheet.value = false }
+
+    fun toggleTransport(option: String) {
+        val current = _selectedTransport.value
+        _selectedTransport.value = if (current.contains(option)) current - option else current + option
+    }
+
+    fun confirmTransport() {
+        val joined = _selectedTransport.value.joinToString(", ")
+        _tripDetails.value = _tripDetails.value.copy(transportation = joined)
+        _showTransportSheet.value = false
+    }
+
     fun navigateTo(screen: Screen) {
         _currentScreen.value = screen
     }

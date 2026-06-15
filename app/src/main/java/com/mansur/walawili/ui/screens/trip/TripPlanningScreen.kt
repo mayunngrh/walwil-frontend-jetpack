@@ -1,14 +1,17 @@
 package com.mansur.walawili.ui.screens.trip
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -19,12 +22,135 @@ import com.mansur.walawili.ui.components.trip.CreateItineraryButton
 import com.mansur.walawili.ui.components.trip.TripFormField
 import com.mansur.walawili.ui.components.trip.TripPlanningHeader
 
+private val transportOptions = listOf(
+    "Flight", "Rental car", "Scooter", "Train", "Taxi / Grab", "Walk", "Ferry"
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TripPlanningScreen(
     viewModel: TripPlanningViewModel = viewModel(),
     onBackClick: () -> Unit = {}
 ) {
     val tripDetails = viewModel.tripDetails.value
+    val showSheet by viewModel.showTransportSheet
+    val selected by viewModel.selectedTransport
+
+    if (showSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.closeTransportSheet() },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 4.dp)
+                        .width(36.dp)
+                        .height(4.dp)
+                        .background(Color(0xFFDDDCEA), RoundedCornerShape(2.dp))
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "How will you get around?",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B1A38)
+                        )
+                        Text(
+                            text = "Tap all that apply.",
+                            fontSize = 13.sp,
+                            color = Color(0xFF9896B0),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFFFF3DC), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "CHOOSE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB07800)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Chip grid
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    transportOptions.forEach { option ->
+                        val isSelected = selected.contains(option)
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = if (isSelected) Color(0xFF2E2C8C) else Color.Transparent,
+                                    shape = RoundedCornerShape(50.dp)
+                                )
+                                .border(
+                                    width = 1.5.dp,
+                                    color = if (isSelected) Color(0xFF2E2C8C) else Color(0xFFDDDCEA),
+                                    shape = RoundedCornerShape(50.dp)
+                                )
+                                .clickable { viewModel.toggleTransport(option) }
+                                .padding(horizontal = 18.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = option,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) Color.White else Color(0xFF1B1A38)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = { viewModel.confirmTransport() },
+                    enabled = selected.isNotEmpty(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2E2C8C),
+                        disabledContainerColor = Color(0xFFB0AECA)
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    val label = if (selected.isEmpty()) "Confirm"
+                    else "Confirm · ${selected.size} selected"
+                    Text(
+                        text = label,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -87,7 +213,7 @@ fun TripPlanningScreen(
                         value = tripDetails.transportation,
                         placeholder = "Flight, rental car, scooter...",
                         icon = Icons.Outlined.DirectionsCar,
-                        onClick = { viewModel.updateTransportation("Flight, rental car, scooter...") }
+                        onClick = { viewModel.openTransportSheet() }
                     )
                     TripFormField(
                         label = "Who's coming with you?",
