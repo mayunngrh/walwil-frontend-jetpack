@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun TripPlanningHeader(
+    title: String,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -51,7 +52,7 @@ fun TripPlanningHeader(
         }
 
         Text(
-            text = "New trip",
+            text = title,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFF1B1A38)

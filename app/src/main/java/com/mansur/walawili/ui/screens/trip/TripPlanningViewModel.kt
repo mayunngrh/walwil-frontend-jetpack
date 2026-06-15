@@ -4,6 +4,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
+sealed class Screen {
+    object TripPlanning : Screen()
+    object Destination : Screen()
+}
+
 data class TripDetails(
     val dateRange: String = "",
     val destination: String = "",
@@ -14,8 +19,19 @@ data class TripDetails(
 )
 
 class TripPlanningViewModel : ViewModel() {
+    private val _currentScreen = mutableStateOf<Screen>(Screen.TripPlanning)
+    val currentScreen: State<Screen> = _currentScreen
+
     private val _tripDetails = mutableStateOf(TripDetails())
     val tripDetails: State<TripDetails> = _tripDetails
+
+    fun navigateTo(screen: Screen) {
+        _currentScreen.value = screen
+    }
+
+    fun navigateBack() {
+        _currentScreen.value = Screen.TripPlanning
+    }
 
     fun updateDateRange(date: String) {
         _tripDetails.value = _tripDetails.value.copy(dateRange = date)

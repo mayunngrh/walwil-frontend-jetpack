@@ -33,12 +33,12 @@ fun TripPlanningScreen(
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
-            TripPlanningHeader(onBackClick = onBackClick)
+            TripPlanningHeader(title = "New trip", onBackClick = onBackClick)
         }
 
         item {
             Column(
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 20.dp)
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 20.dp)
             ) {
                 Text(
                     text = "Let's plan your trip",
@@ -80,7 +80,7 @@ fun TripPlanningScreen(
                         value = tripDetails.destination,
                         placeholder = "",
                         icon = Icons.Outlined.Room,
-                        onClick = { viewModel.updateDestination("Bali, Indonesia") }
+                        onClick = { viewModel.navigateTo(Screen.Destination) }
                     )
                     TripFormField(
                         label = "How will you get around?",
