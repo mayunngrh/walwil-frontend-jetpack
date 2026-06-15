@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mansur.walawili.ui.screens.datepicker.DatePickerScreen
 import com.mansur.walawili.ui.screens.destination.DestinationScreen
+import com.mansur.walawili.ui.screens.itinerary.ItineraryScreen
 import com.mansur.walawili.ui.screens.trip.Screen
 import com.mansur.walawili.ui.screens.trip.TripPlanningScreen
 import com.mansur.walawili.ui.screens.trip.TripPlanningViewModel
@@ -67,6 +68,11 @@ class MainActivity : ComponentActivity() {
                             is Screen.DatePicker -> DatePickerScreen(
                                 initialDateRange = viewModel.tripDetails.value.dateRange,
                                 onApply = { viewModel.updateDateRange(it) },
+                                onBackClick = { viewModel.navigateBack() }
+                            )
+                            is Screen.Itinerary -> ItineraryScreen(
+                                tripTitle = viewModel.tripDetails.value.destination.ifEmpty { "Bali trip" },
+                                tripSubtitle = viewModel.tripDetails.value.dateRange.ifEmpty { "5 – 9 Oct · 2 travelers" },
                                 onBackClick = { viewModel.navigateBack() }
                             )
                         }

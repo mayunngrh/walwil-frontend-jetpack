@@ -11,6 +11,7 @@ sealed class Screen {
     object TripPlanning : Screen()
     object Destination : Screen()
     object DatePicker : Screen()
+    object Itinerary : Screen()
 }
 
 data class TripDetails(
@@ -50,6 +51,6 @@ class TripPlanningViewModel : ViewModel() {
     fun confirmPlaces() = placesSheet.confirm { _tripDetails.value = _tripDetails.value.copy(placeTypes = it) }
 
     fun createItinerary() {
-        println("Creating itinerary: ${_tripDetails.value}")
+        _currentScreen.value = Screen.Itinerary
     }
 }
