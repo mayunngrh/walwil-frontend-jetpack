@@ -25,7 +25,9 @@ fun TripPlanningHeader(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .background(Color.White)
+            .padding(horizontal = 16.dp)
+            .padding(top = 52.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
