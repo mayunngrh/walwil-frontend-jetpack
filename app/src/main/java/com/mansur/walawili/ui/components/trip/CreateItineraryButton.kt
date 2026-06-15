@@ -21,7 +21,7 @@ fun CreateItineraryButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 20.dp)
+            .padding(horizontal = 16.dp, vertical = 42.dp)
     ) {
         Button(
             onClick = onClick,
