@@ -64,6 +64,26 @@ class TripPlanningViewModel : ViewModel() {
         _showTravelersSheet.value = false
     }
 
+    private val _showPurposeSheet = mutableStateOf(false)
+    val showPurposeSheet: State<Boolean> = _showPurposeSheet
+
+    private val _selectedPurpose = mutableStateOf<String?>(null)
+    val selectedPurpose: State<String?> = _selectedPurpose
+
+    private val _customPurpose = mutableStateOf("")
+    val customPurpose: State<String> = _customPurpose
+
+    fun openPurposeSheet() { _showPurposeSheet.value = true }
+    fun closePurposeSheet() { _showPurposeSheet.value = false }
+    fun selectPurpose(option: String) { _selectedPurpose.value = if (_selectedPurpose.value == option) null else option }
+    fun setCustomPurpose(text: String) { _customPurpose.value = text }
+
+    fun confirmPurpose() {
+        val value = _customPurpose.value.trim().ifEmpty { _selectedPurpose.value } ?: return
+        _tripDetails.value = _tripDetails.value.copy(purpose = value)
+        _showPurposeSheet.value = false
+    }
+
     fun navigateTo(screen: Screen) {
         _currentScreen.value = screen
     }

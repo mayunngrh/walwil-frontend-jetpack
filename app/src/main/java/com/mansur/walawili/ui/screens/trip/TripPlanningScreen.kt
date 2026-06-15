@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,6 +17,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +26,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mansur.walawili.ui.components.trip.CreateItineraryButton
 import com.mansur.walawili.ui.components.trip.TripFormField
 import com.mansur.walawili.ui.components.trip.TripPlanningHeader
+
+private val purposeOptions = listOf(
+    "Relaxed holiday", "Honeymoon", "Adventure", "Business", "Family time", "Foodie trip", "Culture & history"
+)
 
 private val transportOptions = listOf(
     "Flight", "Rental car", "Scooter", "Train", "Taxi / Grab", "Walk", "Ferry"
@@ -49,6 +56,9 @@ fun TripPlanningScreen(
     val selected by viewModel.selectedTransport
     val showTravelersSheet by viewModel.showTravelersSheet
     val selectedTraveler by viewModel.selectedTraveler
+    val showPurposeSheet by viewModel.showPurposeSheet
+    val selectedPurpose by viewModel.selectedPurpose
+    val customPurpose by viewModel.customPurpose
 
     if (showSheet) {
         ModalBottomSheet(
@@ -320,6 +330,166 @@ fun TripPlanningScreen(
         }
     }
 
+    if (showPurposeSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.closePurposeSheet() },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 4.dp)
+                        .width(36.dp)
+                        .height(4.dp)
+                        .background(Color(0xFFDDDCEA), RoundedCornerShape(2.dp))
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "What's the purpose?",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B1A38)
+                        )
+                        Text(
+                            text = "Pick one — or write your own.",
+                            fontSize = 13.sp,
+                            color = Color(0xFF9896B0),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFFFF3DC), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "PICK / TYPE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB07800)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    purposeOptions.forEach { option ->
+                        val isSelected = selectedPurpose == option && customPurpose.isEmpty()
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = if (isSelected) Color(0xFF2E2C8C) else Color.Transparent,
+                                    shape = RoundedCornerShape(50.dp)
+                                )
+                                .border(
+                                    width = 1.5.dp,
+                                    color = if (isSelected) Color(0xFF2E2C8C) else Color(0xFFDDDCEA),
+                                    shape = RoundedCornerShape(50.dp)
+                                )
+                                .clickable {
+                                    viewModel.selectPurpose(option)
+                                    viewModel.setCustomPurpose("")
+                                }
+                                .padding(horizontal = 18.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = option,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) Color.White else Color(0xFF1B1A38)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Custom text input
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.5.dp, Color(0xFFDDDCEA), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = "+",
+                        fontSize = 16.sp,
+                        color = Color(0xFFB0AECA),
+                        fontWeight = FontWeight.Normal
+                    )
+                    BasicTextField(
+                        value = customPurpose,
+                        onValueChange = {
+                            viewModel.setCustomPurpose(it)
+                            if (it.isNotEmpty()) viewModel.selectPurpose("")
+                        },
+                        modifier = Modifier.weight(1f),
+                        textStyle = TextStyle(
+                            fontSize = 15.sp,
+                            color = Color(0xFF1B1A38)
+                        ),
+                        singleLine = true,
+                        cursorBrush = SolidColor(Color(0xFF2E2C8C)),
+                        decorationBox = { inner ->
+                            if (customPurpose.isEmpty()) {
+                                Text(
+                                    text = "Type your own purpose...",
+                                    fontSize = 15.sp,
+                                    color = Color(0xFFB0AECA)
+                                )
+                            }
+                            inner()
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                val canConfirm = selectedPurpose != null || customPurpose.isNotEmpty()
+                Button(
+                    onClick = { viewModel.confirmPurpose() },
+                    enabled = canConfirm,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2E2C8C),
+                        disabledContainerColor = Color(0xFFB0AECA)
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    Text(
+                        text = "Confirm",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -395,7 +565,7 @@ fun TripPlanningScreen(
                         value = tripDetails.purpose,
                         placeholder = "Relaxed holiday, honeymoon...",
                         icon = Icons.Outlined.TrackChanges,
-                        onClick = { viewModel.updatePurpose("Relaxed holiday, honeymoon...") }
+                        onClick = { viewModel.openPurposeSheet() }
                     )
                     TripFormField(
                         label = "What kind of places?",
