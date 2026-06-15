@@ -84,6 +84,31 @@ class TripPlanningViewModel : ViewModel() {
         _showPurposeSheet.value = false
     }
 
+    private val _showPlacesSheet = mutableStateOf(false)
+    val showPlacesSheet: State<Boolean> = _showPlacesSheet
+
+    private val _selectedPlaces = mutableStateOf<Set<String>>(emptySet())
+    val selectedPlaces: State<Set<String>> = _selectedPlaces
+
+    private val _customPlace = mutableStateOf("")
+    val customPlace: State<String> = _customPlace
+
+    fun openPlacesSheet() { _showPlacesSheet.value = true }
+    fun closePlacesSheet() { _showPlacesSheet.value = false }
+    fun togglePlace(option: String) {
+        val current = _selectedPlaces.value
+        _selectedPlaces.value = if (current.contains(option)) current - option else current + option
+    }
+    fun setCustomPlace(text: String) { _customPlace.value = text }
+
+    fun confirmPlaces() {
+        val custom = _customPlace.value.trim()
+        val all = _selectedPlaces.value.toMutableList()
+        if (custom.isNotEmpty()) all.add(custom)
+        _tripDetails.value = _tripDetails.value.copy(placeTypes = all.joinToString(", "))
+        _showPlacesSheet.value = false
+    }
+
     fun navigateTo(screen: Screen) {
         _currentScreen.value = screen
     }

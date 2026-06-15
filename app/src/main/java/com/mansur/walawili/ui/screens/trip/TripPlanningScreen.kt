@@ -27,6 +27,10 @@ import com.mansur.walawili.ui.components.trip.CreateItineraryButton
 import com.mansur.walawili.ui.components.trip.TripFormField
 import com.mansur.walawili.ui.components.trip.TripPlanningHeader
 
+private val placeOptions = listOf(
+    "Beaches", "Cafés", "Temples & culture", "Nature", "Local food", "Nightlife", "Shopping", "Art & museums", "Waterfalls"
+)
+
 private val purposeOptions = listOf(
     "Relaxed holiday", "Honeymoon", "Adventure", "Business", "Family time", "Foodie trip", "Culture & history"
 )
@@ -59,6 +63,9 @@ fun TripPlanningScreen(
     val showPurposeSheet by viewModel.showPurposeSheet
     val selectedPurpose by viewModel.selectedPurpose
     val customPurpose by viewModel.customPurpose
+    val showPlacesSheet by viewModel.showPlacesSheet
+    val selectedPlaces by viewModel.selectedPlaces
+    val customPlace by viewModel.customPlace
 
     if (showSheet) {
         ModalBottomSheet(
@@ -490,6 +497,153 @@ fun TripPlanningScreen(
         }
     }
 
+    if (showPlacesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.closePlacesSheet() },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = Color.White,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 4.dp)
+                        .width(36.dp)
+                        .height(4.dp)
+                        .background(Color(0xFFDDDCEA), RoundedCornerShape(2.dp))
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "What kind of places?",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1B1A38)
+                        )
+                        Text(
+                            text = "Pick as many as you like, or add your own.",
+                            fontSize = 13.sp,
+                            color = Color(0xFF9896B0),
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFFFF3DC), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "MULTI / TYPE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB07800)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    placeOptions.forEach { option ->
+                        val isSelected = selectedPlaces.contains(option)
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = if (isSelected) Color(0xFF2E2C8C) else Color.Transparent,
+                                    shape = RoundedCornerShape(50.dp)
+                                )
+                                .border(
+                                    width = 1.5.dp,
+                                    color = if (isSelected) Color(0xFF2E2C8C) else Color(0xFFDDDCEA),
+                                    shape = RoundedCornerShape(50.dp)
+                                )
+                                .clickable { viewModel.togglePlace(option) }
+                                .padding(horizontal = 18.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = option,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) Color.White else Color(0xFF1B1A38)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.5.dp, Color(0xFFDDDCEA), RoundedCornerShape(14.dp))
+                        .padding(horizontal = 14.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(text = "+", fontSize = 16.sp, color = Color(0xFFB0AECA))
+                    BasicTextField(
+                        value = customPlace,
+                        onValueChange = { viewModel.setCustomPlace(it) },
+                        modifier = Modifier.weight(1f),
+                        textStyle = TextStyle(fontSize = 15.sp, color = Color(0xFF1B1A38)),
+                        singleLine = true,
+                        cursorBrush = SolidColor(Color(0xFF2E2C8C)),
+                        decorationBox = { inner ->
+                            if (customPlace.isEmpty()) {
+                                Text(
+                                    text = "e.g. hidden waterfalls, surf spots...",
+                                    fontSize = 15.sp,
+                                    color = Color(0xFFB0AECA)
+                                )
+                            }
+                            inner()
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                val totalSelected = selectedPlaces.size + if (customPlace.trim().isNotEmpty()) 1 else 0
+                Button(
+                    onClick = { viewModel.confirmPlaces() },
+                    enabled = totalSelected > 0,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF2E2C8C),
+                        disabledContainerColor = Color(0xFFB0AECA)
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    val label = if (totalSelected == 0) "Confirm"
+                    else "Confirm · $totalSelected selected"
+                    Text(
+                        text = label,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -573,7 +727,7 @@ fun TripPlanningScreen(
                         placeholder = "Beaches, cafés, culture...",
                         icon = Icons.Outlined.Explore,
                         isLast = true,
-                        onClick = { viewModel.updatePlaceTypes("Beaches, cafés, culture...") }
+                        onClick = { viewModel.openPlacesSheet() }
                     )
                 }
             }
