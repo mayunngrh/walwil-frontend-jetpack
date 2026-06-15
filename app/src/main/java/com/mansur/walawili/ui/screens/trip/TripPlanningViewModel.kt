@@ -12,6 +12,7 @@ sealed class Screen {
     object Destination : Screen()
     object DatePicker : Screen()
     object Itinerary : Screen()
+    data class EditActivity(val stopId: String) : Screen()
 }
 
 data class TripDetails(

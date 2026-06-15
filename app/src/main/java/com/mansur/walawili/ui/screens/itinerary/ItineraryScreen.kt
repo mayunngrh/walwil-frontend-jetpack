@@ -93,18 +93,22 @@ private val sampleDays = listOf(
     )
 )
 
+// Shared mutable state lifted so MainActivity can access it for edit navigation
+val itineraryDayStops: MutableList<androidx.compose.runtime.snapshots.SnapshotStateList<ItineraryStop>> by lazy {
+    sampleDays.map { it.stops.toMutableStateList() }.toMutableStateList()
+}
+
 @Composable
 fun ItineraryScreen(
     tripTitle: String = "Bali trip",
     tripSubtitle: String = "5 – 9 Oct · 2 travelers",
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onEditStop: (ItineraryStop) -> Unit = {}
 ) {
     var selectedDayIndex by remember { mutableIntStateOf(0) }
 
-    // Mutable per-day stop lists so reorder is persisted per day
-    val dayStops = remember {
-        sampleDays.map { it.stops.toMutableStateList() }.toMutableStateList()
-    }
+    // Use shared mutable state so edits from EditActivityScreen reflect here
+    val dayStops = remember { itineraryDayStops }
 
     var expandedStopId by remember { mutableStateOf<String?>(null) }
 
@@ -262,7 +266,8 @@ fun ItineraryScreen(
                         cardModifier = cardModifier,
                         onToggle = {
                             expandedStopId = if (isExpanded) null else stop.id
-                        }
+                        },
+                        onEditClick = { onEditStop(stop) }
                     )
                 }
             }
@@ -292,7 +297,8 @@ private fun TimelineStopItem(
     isDragging: Boolean,
     dragHandleModifier: Modifier,
     cardModifier: Modifier,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onEditClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -419,7 +425,7 @@ private fun TimelineStopItem(
 
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Button(
-                                    onClick = {},
+                                    onClick = { onEditClick() },
                                     modifier = Modifier.weight(1f).height(40.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = Primary),
                                     shape = RoundedCornerShape(20.dp)

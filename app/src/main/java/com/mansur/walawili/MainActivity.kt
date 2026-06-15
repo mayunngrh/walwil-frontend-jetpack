@@ -14,7 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mansur.walawili.ui.screens.datepicker.DatePickerScreen
 import com.mansur.walawili.ui.screens.destination.DestinationScreen
+import com.mansur.walawili.ui.screens.itinerary.EditActivityScreen
 import com.mansur.walawili.ui.screens.itinerary.ItineraryScreen
+import com.mansur.walawili.ui.screens.itinerary.itineraryDayStops
 import com.mansur.walawili.ui.screens.trip.Screen
 import com.mansur.walawili.ui.screens.trip.TripPlanningScreen
 import com.mansur.walawili.ui.screens.trip.TripPlanningViewModel
@@ -73,8 +75,28 @@ class MainActivity : ComponentActivity() {
                             is Screen.Itinerary -> ItineraryScreen(
                                 tripTitle = viewModel.tripDetails.value.destination.ifEmpty { "Bali trip" },
                                 tripSubtitle = viewModel.tripDetails.value.dateRange.ifEmpty { "5 – 9 Oct · 2 travelers" },
-                                onBackClick = { viewModel.navigateBack() }
+                                onBackClick = { viewModel.navigateBack() },
+                                onEditStop = { stop -> viewModel.navigateTo(Screen.EditActivity(stop.id)) }
                             )
+                            is Screen.EditActivity -> {
+                                // Find the stop across all days
+                                val stopId = screen.stopId
+                                val stop = itineraryDayStops.flatten().firstOrNull { it.id == stopId }
+                                if (stop != null) {
+                                    EditActivityScreen(
+                                        stop = stop,
+                                        onSave = { updated ->
+                                            // Update in shared list
+                                            itineraryDayStops.forEach { dayList ->
+                                                val idx = dayList.indexOfFirst { it.id == updated.id }
+                                                if (idx >= 0) dayList[idx] = updated
+                                            }
+                                            viewModel.navigateTo(Screen.Itinerary)
+                                        },
+                                        onDismiss = { viewModel.navigateTo(Screen.Itinerary) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
