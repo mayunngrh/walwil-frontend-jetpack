@@ -73,7 +73,7 @@ fun TripPlanningScreen(
                         value = tripDetails.dateRange,
                         placeholder = "",
                         icon = Icons.Outlined.CalendarMonth,
-                        onClick = { viewModel.updateDateRange("5 – 9 Oct 2026") }
+                        onClick = { viewModel.navigateTo(Screen.DatePicker) }
                     )
                     TripFormField(
                         label = "Where to?",

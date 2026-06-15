@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 sealed class Screen {
     object TripPlanning : Screen()
     object Destination : Screen()
+    object DatePicker : Screen()
 }
 
 data class TripDetails(

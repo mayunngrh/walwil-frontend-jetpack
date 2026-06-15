@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mansur.walawili.ui.screens.datepicker.DatePickerScreen
 import com.mansur.walawili.ui.screens.destination.DestinationScreen
 import com.mansur.walawili.ui.screens.trip.Screen
 import com.mansur.walawili.ui.screens.trip.TripPlanningScreen
@@ -35,19 +36,19 @@ class MainActivity : ComponentActivity() {
                         targetState = currentScreen,
                         transitionSpec = {
                             when (targetState) {
-                                is Screen.Destination -> slideInVertically(
-                                    initialOffsetY = { it },
-                                    animationSpec = tween(350)
-                                ) togetherWith slideOutVertically(
-                                    targetOffsetY = { -it / 8 },
-                                    animationSpec = tween(350)
-                                )
-                                else -> slideInVertically(
+                                is Screen.TripPlanning -> slideInVertically(
                                     initialOffsetY = { it / 8 },
                                     animationSpec = tween(300)
                                 ) togetherWith slideOutVertically(
                                     targetOffsetY = { it },
                                     animationSpec = tween(300)
+                                )
+                                else -> slideInVertically(
+                                    initialOffsetY = { it },
+                                    animationSpec = tween(350)
+                                ) togetherWith slideOutVertically(
+                                    targetOffsetY = { -it / 8 },
+                                    animationSpec = tween(350)
                                 )
                             }
                         },
@@ -61,6 +62,11 @@ class MainActivity : ComponentActivity() {
                             is Screen.Destination -> DestinationScreen(
                                 currentDestination = viewModel.tripDetails.value.destination,
                                 onDestinationSelected = { viewModel.updateDestination(it) },
+                                onBackClick = { viewModel.navigateBack() }
+                            )
+                            is Screen.DatePicker -> DatePickerScreen(
+                                initialDateRange = viewModel.tripDetails.value.dateRange,
+                                onApply = { viewModel.updateDateRange(it) },
                                 onBackClick = { viewModel.navigateBack() }
                             )
                         }
