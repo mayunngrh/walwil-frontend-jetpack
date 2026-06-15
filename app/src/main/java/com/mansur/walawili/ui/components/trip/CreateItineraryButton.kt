@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CreateItineraryButton(
     onClick: () -> Unit,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -24,11 +25,13 @@ fun CreateItineraryButton(
     ) {
         Button(
             onClick = onClick,
+            enabled = enabled,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(58.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2E2C8C)
+                containerColor = Color(0xFF2E2C8C),
+                disabledContainerColor = Color(0xFFB0AECA)
             ),
             shape = RoundedCornerShape(28.dp)
         ) {

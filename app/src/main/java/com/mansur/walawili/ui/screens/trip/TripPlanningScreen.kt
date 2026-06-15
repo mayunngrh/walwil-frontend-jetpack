@@ -101,7 +101,17 @@ fun TripPlanningScreen(
             }
         }
 
+        val allFieldsFilled = tripDetails.dateRange.isNotEmpty() &&
+                tripDetails.destination.isNotEmpty() &&
+                tripDetails.transportation.isNotEmpty() &&
+                tripDetails.travelers.isNotEmpty() &&
+                tripDetails.purpose.isNotEmpty() &&
+                tripDetails.placeTypes.isNotEmpty()
+
         HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE0DFF0))
-        CreateItineraryButton(onClick = { viewModel.createItinerary() })
+        CreateItineraryButton(
+            onClick = { viewModel.createItinerary() },
+            enabled = allFieldsFilled
+        )
     }
 }
