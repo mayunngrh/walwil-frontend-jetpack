@@ -20,6 +20,8 @@ import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -159,9 +161,41 @@ fun ItineraryScreen(
         // ── Scrollable content ──────────────────────────────────
         val currentStops = dayStops[selectedDayIndex]
         val lazyListState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
+
+        // Scroll expanded card into view (3 header items: banner, tabs, heading)
+        val headerCount = 3
+        LaunchedEffect(expandedStopId) {
+            if (expandedStopId != null) {
+                val stopIndex = currentStops.indexOfFirst { it.id == expandedStopId }
+                if (stopIndex >= 0) {
+                    coroutineScope.launch {
+                        // Wait for AnimatedVisibility expand to finish (~300ms)
+                        delay(320)
+                        val itemIndex = headerCount + stopIndex
+                        val layoutInfo = lazyListState.layoutInfo
+                        val visibleItem = layoutInfo.visibleItemsInfo.firstOrNull { it.index == itemIndex }
+                        val viewportEnd = layoutInfo.viewportEndOffset
+
+                        if (visibleItem != null) {
+                            val itemBottom = visibleItem.offset + visibleItem.size
+                            val overflow = itemBottom - viewportEnd
+                            if (overflow > 0) {
+                                // Item is partially off-screen — scroll just enough to show its bottom
+                                lazyListState.scroll {
+                                    scrollBy(overflow.toFloat() + 24f)
+                                }
+                            }
+                        } else {
+                            // Item not visible at all — scroll it into view
+                            lazyListState.animateScrollToItem(itemIndex, scrollOffset = -80)
+                        }
+                    }
+                }
+            }
+        }
+
         val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
-            // from/to indices are offset by the number of header items (3: banner, tabs, date)
-            val headerCount = 3
             val fromStop = from.index - headerCount
             val toStop = to.index - headerCount
             if (fromStop >= 0 && toStop >= 0 && fromStop < currentStops.size && toStop < currentStops.size) {
